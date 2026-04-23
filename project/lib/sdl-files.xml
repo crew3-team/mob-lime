@@ -159,6 +159,41 @@
 
         </section>
 
+        <section>
+
+            <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/custom/sdl/include" />
+            <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/include" />
+
+        </section>
+
+        <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/src" />
+
+        <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl/wayland-generated-protocols" if="linux" />
+
+        <section>
+
+            <compilerflag value="-DSDL_DISABLE_ALLOCA" />
+            <compilerflag value="-DSDL_USE_BUILTIN_OPENGL_DEFINITIONS" />
+
+            <section>
+
+                <compilerflag value="-Wno-deprecated-declarations" if="macos || android" />
+
+            </section>
+
+        </section>
+
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_assert.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_error.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_guid.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_hashtable.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_hints.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_list.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_log.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_properties.c" />
+        <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/SDL_utils.c" />
+
         <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/atomic/SDL_atomic.c" />
         <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/atomic/SDL_spinlock.c" />
         <file name="${NATIVE_TOOLKIT_PATH}/sdl/src/audio/disk/SDL_diskaudio.c" />

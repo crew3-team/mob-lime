@@ -22,14 +22,6 @@
 	path = project/lib/zlib
 	url = https://github.com/madler/zlib
 	shallow = true
-[submodule "project/lib/png"]
-	path = project/lib/png
-	url = https://github.com/glennrp/libpng
-	shallow = true
-[submodule "project/lib/jpeg"]
-	path = project/lib/jpeg
-	url = https://github.com/libjpeg-turbo/libjpeg-turbo
-	shallow = true
 [submodule "project/lib/freetype"]
 	path = project/lib/freetype
 	url = https://github.com/freetype/freetype
@@ -81,3 +73,7 @@
 [submodule "project/lib/sdl_sound"]
 	path = project/lib/sdl_sound
 	url = https://github.com/icculus/SDL_sound.git
+[submodule "project/lib/sdl_image"]
+	path = project/lib/sdl_image
+	url = https://github.com/libsdl-org/SDL_image.git
+	shallow = true
