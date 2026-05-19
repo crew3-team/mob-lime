@@ -4504,7 +4504,6 @@ namespace lime {
 	#define _TTEXT_EVENT _OBJ (_I32 _I32 _I32 _BYTES _I32 _I32)
 	#define _TTOUCH_EVENT _OBJ (_I32 _F64 _F64 _I32 _F64 _I32 _F64 _F64)
 	#define _TVECTOR2 _OBJ (_F64 _F64)
-	#define _TVORBISFILE _OBJ (_I32 _DYN)
 	#define _TWINDOW_EVENT _OBJ (_I32 _I32 _I32 _I32 _I32 _I32)
 
 	#define _TARRAYBUFFER _TBYTES
@@ -4724,12 +4723,6 @@ extern "C" int lime_opengl_register_prims ();
 extern "C" int lime_opengl_register_prims () { return 0; }
 #endif
 
-#ifdef LIME_VORBIS
-extern "C" int lime_vorbis_register_prims ();
-#else
-extern "C" int lime_vorbis_register_prims () { return 0; }
-#endif
-
 
 extern "C" int lime_register_prims () {
 
@@ -4738,7 +4731,6 @@ extern "C" int lime_register_prims () {
 	lime_harfbuzz_register_prims ();
 	lime_openal_register_prims ();
 	lime_opengl_register_prims ();
-	lime_vorbis_register_prims ();
 
 	return 0;
 
