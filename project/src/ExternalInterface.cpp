@@ -16,9 +16,15 @@
 #include <graphics/Image.h>
 #include <graphics/ImageBuffer.h>
 #include <graphics/RenderEvent.h>
-#include <media/containers/OGG.h>
-#include <media/containers/WAV.h>
+#include <graphics/utils/ImageDataUtil.h>
+#ifdef LIME_OGG
+#include <media/decoders/OggDecoder.h>
+#endif
+#ifdef LIME_OPUS
+#include <media/decoders/OpusDecoder.h>
+#endif
 #include <media/AudioBuffer.h>
+#include <system/CFFI.h>
 #include <system/CFFIPointer.h>
 #include <system/Clipboard.h>
 #include <system/ClipboardEvent.h>
@@ -367,33 +373,40 @@ namespace lime {
 
 	value lime_audio_load_bytes (value data, value buffer) {
 
-		Resource resource;
-		Bytes bytes;
-
 		AudioBuffer audioBuffer = AudioBuffer (buffer);
 
-		bytes.Set (data);
-		resource = Resource (&bytes);
+		Bytes bytes = Bytes (data);
 
-		#ifdef LIME_SDL_SOUND
-		if (SDLSound::Decode (&resource, &audioBuffer)) {
+		Resource resource = Resource (&bytes);
+
+		#ifdef LIME_OGG
+		AudioDecoder* oggDecoder = new OggDecoder();
+
+		if (oggDecoder->Load (&resource, &audioBuffer)) {
+
+			delete oggDecoder;
 
 			return audioBuffer.Value (buffer);
+
+		} else {
+
+			delete oggDecoder;
 
 		}
 		#endif
 
+		#ifdef LIME_OPUS
+		AudioDecoder* opusDecoder = new OpusDecoder();
 
-		if (WAV::Decode (&resource, &audioBuffer)) {
+		if (opusDecoder->Load (&resource, &audioBuffer)) {
 
-			return audioBuffer.Value (buffer);
-
-		}
-
-		#ifdef LIME_OGG
-		if (OGG::Decode (&resource, &audioBuffer)) {
+			delete opusDecoder;
 
 			return audioBuffer.Value (buffer);
+
+		} else {
+
+			delete opusDecoder;
 
 		}
 		#endif
@@ -407,24 +420,34 @@ namespace lime {
 
 		Resource resource = Resource (data);
 
-		#ifdef LIME_SDL_SOUND
-		if (SDLSound::Decode (&resource, buffer)) {
+		#ifdef LIME_OGG
+		AudioDecoder* oggDecoder = new OggDecoder();
+
+		if (oggDecoder->Load (&resource, buffer)) {
+
+			delete oggDecoder;
 
 			return buffer;
+
+		} else {
+
+			delete oggDecoder;
 
 		}
 		#endif
 
-		if (WAV::Decode (&resource, buffer)) {
+		#ifdef LIME_OPUS
+		AudioDecoder* opusDecoder = new OpusDecoder();
+
+		if (opusDecoder->Load (&resource, buffer)) {
+
+			delete opusDecoder;
 
 			return buffer;
 
-		}
+		} else {
 
-		#ifdef LIME_OGG
-		if (OGG::Decode (&resource, buffer)) {
-
-			return buffer;
+			delete opusDecoder;
 
 		}
 		#endif
@@ -436,30 +459,38 @@ namespace lime {
 
 	value lime_audio_load_file (value data, value buffer) {
 
-		Resource resource;
-
 		AudioBuffer audioBuffer = AudioBuffer (buffer);
 
-		resource = Resource (val_string (data));
+		Resource resource = Resource (val_string (data));
 
-		#ifdef LIME_SDL_SOUND
-		if (SDLSound::Decode (&resource, &audioBuffer)) {
+		#ifdef LIME_OGG
+		AudioDecoder* oggDecoder = new OggDecoder();
+
+		if (oggDecoder->Load (&resource, &audioBuffer)) {
+
+			delete oggDecoder;
 
 			return audioBuffer.Value (buffer);
+
+		} else {
+
+			delete oggDecoder;
 
 		}
 		#endif
 
-		if (WAV::Decode (&resource, &audioBuffer)) {
+		#ifdef LIME_OPUS
+		AudioDecoder* opusDecoder = new OpusDecoder();
+
+		if (opusDecoder->Load (&resource, &audioBuffer)) {
+
+			delete opusDecoder;
 
 			return audioBuffer.Value (buffer);
 
-		}
+		} else {
 
-		#ifdef LIME_OGG
-		if (OGG::Decode (&resource, &audioBuffer)) {
-
-			return audioBuffer.Value (buffer);
+			delete opusDecoder;
 
 		}
 		#endif
@@ -473,24 +504,34 @@ namespace lime {
 
 		Resource resource = Resource (data ? hl_to_utf8 ((const uchar*)data->bytes) : NULL);
 
-		#ifdef LIME_SDL_SOUND
-		if (SDLSound::Decode (&resource, buffer)) {
+		#ifdef LIME_OGG
+		AudioDecoder* oggDecoder = new OggDecoder();
+
+		if (oggDecoder->Load (&resource, buffer)) {
+
+			delete oggDecoder;
 
 			return buffer;
+
+		} else {
+
+			delete oggDecoder;
 
 		}
 		#endif
 
-		if (WAV::Decode (&resource, buffer)) {
+		#ifdef LIME_OPUS
+		AudioDecoder* opusDecoder = new OpusDecoder();
+
+		if (opusDecoder->Load (&resource, buffer)) {
+
+			delete opusDecoder;
 
 			return buffer;
 
-		}
+		} else {
 
-		#ifdef LIME_OGG
-		if (OGG::Decode (&resource, buffer)) {
-
-			return buffer;
+			delete opusDecoder;
 
 		}
 		#endif
