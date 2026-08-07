@@ -346,7 +346,7 @@ namespace lime
 
 		return alloc_null();
 	}
-
+	
 	int Font::GetHeight()
 	{
 		return face->height;
@@ -496,7 +496,7 @@ namespace lime
 
 	void Font::SetSize(size_t size)
 	{
-		FT_Set_Char_Size(face, 0, static_cast<int>(size * 64), 0, 0);
+		FT_Set_Char_Size((FT_Face)face, 0, static_cast<int>(size * 64), 0, 0);
 	}
 
 } // namespace lime

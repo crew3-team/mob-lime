@@ -1043,7 +1043,7 @@ namespace lime {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)val_data (fontHandle);
-		return (value)font->GetGlyphIndices (true, hxs_utf8 (characters, nullptr));
+		return (value)font->GetGlyphIndices (hxs_utf8 (characters, nullptr));
 		#else
 		return alloc_null ();
 		#endif
@@ -1053,12 +1053,8 @@ namespace lime {
 
 	HL_PRIM hl_varray* HL_NAME(hl_font_get_glyph_indices) (HL_CFFIPointer* fontHandle, hl_vstring* characters) {
 
-		#ifdef LIME_FREETYPE
-		Font *font = (Font*)fontHandle->ptr;
-		return (hl_varray*)font->GetGlyphIndices (false, characters ? (char*)hl_to_utf8 ((const uchar*)characters->bytes) : NULL);
-		#else
+		// Font::GetGlyphIndices only builds CFFI arrays now
 		return 0;
-		#endif
 
 	}
 
@@ -1067,7 +1063,7 @@ namespace lime {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)val_data (fontHandle);
-		return (value)font->GetGlyphMetrics (true, index);
+		return (value)font->GetGlyphMetrics (index);
 		#else
 		return alloc_null ();
 		#endif
@@ -1077,11 +1073,37 @@ namespace lime {
 
 	HL_PRIM vdynamic* HL_NAME(hl_font_get_glyph_metrics) (HL_CFFIPointer* fontHandle, int index) {
 
-		#ifdef LIME_FREETYPE
-		Font *font = (Font*)fontHandle->ptr;
-		return (vdynamic*)font->GetGlyphMetrics (false, index);
-		#else
+		// Font::GetGlyphMetrics only builds CFFI objects now
 		return 0;
+
+	}
+
+
+	value lime_font_get_glyph_kerning (value fontHandle, int leftIndex, int rightIndex) {
+
+		#ifdef LIME_FREETYPE
+		Font *font = (Font*)val_data (fontHandle);
+		return (value)font->GetKerning (leftIndex, rightIndex);
+		#else
+		return alloc_null ();
+		#endif
+
+	}
+
+
+	void lime_font_initialize_library () {
+
+		#ifdef LIME_FREETYPE
+		Font::InitializeLibrary ();
+		#endif
+
+	}
+
+
+	void lime_font_shutdown_library () {
+
+		#ifdef LIME_FREETYPE
+		Font::ShutdownLibrary ();
 		#endif
 
 	}
@@ -1381,38 +1403,13 @@ namespace lime {
 
 	}
 
-
-	value lime_font_outline_decompose (value fontHandle, int size) {
-
-		#ifdef LIME_FREETYPE
-		Font *font = (Font*)val_data (fontHandle);
-		return (value)font->Decompose (true, size);
-		#else
-		return alloc_null ();
-		#endif
-
-	}
-
-
-	HL_PRIM vdynamic* HL_NAME(hl_font_outline_decompose) (HL_CFFIPointer* fontHandle, int size) {
-
-		#ifdef LIME_FREETYPE
-		Font *font = (Font*)fontHandle->ptr;
-		return (vdynamic*)font->Decompose (false, size);
-		#else
-		return 0;
-		#endif
-
-	}
-
-
-	value lime_font_render_glyph (value fontHandle, int index, value data) {
+	value lime_font_render_glyph (value fontHandle, int index, value data, int flags) {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)val_data (fontHandle);
 		Bytes bytes (data);
 
-		if (font->RenderGlyph (index, &bytes)) {
+		if (font->RenderGlyph (index, &bytes, 0, flags)) {
 
 			return bytes.Value (data);
 
@@ -1441,15 +1438,30 @@ namespace lime {
 	}
 
 
-	value lime_font_render_glyphs (value fontHandle, value indices, value data) {
+	value lime_font_render_glyphs (value fontHandle, value indices, value data, int flags) {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)val_data (fontHandle);
 		Bytes bytes (data);
 
-		if (font->RenderGlyphs (indices, &bytes)) {
+		int numIndices = val_array_size (indices);
 
-			return bytes.Value (data);
+		if (numIndices > 0) {
+
+			std::vector<int> glyphs (numIndices);
+
+			for (int i = 0; i < numIndices; i++) {
+
+				glyphs[i] = val_int (val_array_i (indices, i));
+
+			}
+
+			// RenderGlyphs returns 4 (just the count header) when nothing was rendered
+			if (font->RenderGlyphs (glyphs.data (), numIndices, &bytes, flags) > 4) {
+
+				return bytes.Value (data);
+
+			}
 
 		}
 		#endif
@@ -1461,31 +1473,26 @@ namespace lime {
 
 	HL_PRIM Bytes* HL_NAME(hl_font_render_glyphs) (HL_CFFIPointer* fontHandle, hl_varray* indices, Bytes* data) {
 
-		// #ifdef LIME_FREETYPE
-		// Font *font = (Font*)fontHandle->ptr;
-		// return font->RenderGlyphs (indices, &bytes);
-		// #else
 		return NULL;
-		// #endif
 
 	}
 
 
-	void lime_font_set_size (value fontHandle, int fontSize, int dpi) {
+	void lime_font_set_size (value fontHandle, int size) {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)val_data (fontHandle);
-		font->SetSize (fontSize, dpi);
+		font->SetSize (size);
 		#endif
 
 	}
 
 
-	HL_PRIM void HL_NAME(hl_font_set_size) (HL_CFFIPointer* fontHandle, int fontSize, int dpi) {
+	HL_PRIM void HL_NAME(hl_font_set_size) (HL_CFFIPointer* fontHandle, int size) {
 
 		#ifdef LIME_FREETYPE
 		Font *font = (Font*)fontHandle->ptr;
-		font->SetSize (fontSize, dpi);
+		font->SetSize (size);
 		#endif
 
 	}
@@ -4344,6 +4351,9 @@ namespace lime {
 	DEFINE_PRIME2 (lime_font_get_glyph_index);
 	DEFINE_PRIME2 (lime_font_get_glyph_indices);
 	DEFINE_PRIME2 (lime_font_get_glyph_metrics);
+	DEFINE_PRIME3 (lime_font_get_glyph_kerning);
+	DEFINE_PRIME0v (lime_font_initialize_library);
+	DEFINE_PRIME0v (lime_font_shutdown_library);
 	DEFINE_PRIME1 (lime_font_get_height);
 	DEFINE_PRIME1 (lime_font_get_num_glyphs);
 	DEFINE_PRIME1 (lime_font_get_underline_position);
@@ -4354,10 +4364,9 @@ namespace lime {
 	DEFINE_PRIME1 (lime_font_load);
 	DEFINE_PRIME1 (lime_font_load_bytes);
 	DEFINE_PRIME1 (lime_font_load_file);
-	DEFINE_PRIME2 (lime_font_outline_decompose);
-	DEFINE_PRIME3 (lime_font_render_glyph);
-	DEFINE_PRIME3 (lime_font_render_glyphs);
-	DEFINE_PRIME3v (lime_font_set_size);
+	DEFINE_PRIME4 (lime_font_render_glyph);
+	DEFINE_PRIME4 (lime_font_render_glyphs);
+	DEFINE_PRIME2v (lime_font_set_size);
 	DEFINE_PRIME1v (lime_gamepad_add_mappings);
 	DEFINE_PRIME2v (lime_gamepad_event_manager_register);
 	DEFINE_PRIME1 (lime_gamepad_get_device_guid);
@@ -4559,10 +4568,9 @@ namespace lime {
 	// DEFINE_PRIME1 (lime_font_load);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_font_load_bytes, _TBYTES);
 	DEFINE_HL_PRIM (_TCFFIPOINTER, hl_font_load_file, _STRING);
-	DEFINE_HL_PRIM (_DYN, hl_font_outline_decompose, _TCFFIPOINTER _I32);
 	DEFINE_HL_PRIM (_TBYTES, hl_font_render_glyph, _TCFFIPOINTER _I32 _TBYTES);
 	DEFINE_HL_PRIM (_TBYTES, hl_font_render_glyphs, _TCFFIPOINTER _ARR _TBYTES);
-	DEFINE_HL_PRIM (_VOID, hl_font_set_size, _TCFFIPOINTER _I32 _I32);
+	DEFINE_HL_PRIM (_VOID, hl_font_set_size, _TCFFIPOINTER _I32);
 	DEFINE_HL_PRIM (_VOID, hl_gamepad_add_mappings, _ARR);
 	DEFINE_HL_PRIM (_VOID, hl_gamepad_event_manager_register, _FUN(_VOID, _NO_ARG) _TGAMEPAD_EVENT);
 	DEFINE_HL_PRIM (_BYTES, hl_gamepad_get_device_guid, _I32);

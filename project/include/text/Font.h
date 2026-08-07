@@ -2,11 +2,6 @@
 #define LIME_TEXT_FONT_H
 
 
-#include <graphics/ImageBuffer.h>
-#include <system/CFFI.h>
-#include <system/System.h>
-#include <utils/Resource.h>
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_BITMAP_H
@@ -15,6 +10,11 @@
 #include FT_SFNT_NAMES_H
 #include FT_TRUETYPE_IDS_H
 #include FT_TRUETYPE_TABLES_H
+
+#include <graphics/ImageBuffer.h>
+#include <system/CFFI.h>
+#include <system/System.h>
+#include <utils/Resource.h>
 
 #ifdef HX_WINDOWS
 #undef GetGlyphIndices
