@@ -64,10 +64,9 @@ namespace lime {
 
 	}
 
-
-	bool OggDecoder::Open (Resource* resource) {
-
-		File* file = resource->path ? new File (resource->path, "rb") : new File (resource->data);
+	bool OggDecoder::Open(Resource *resource)
+	{
+		File *file = resource->path ? new File(resource->path, "rb") : new File(resource->data, true);
 
 		if (!file->handle) {
 
