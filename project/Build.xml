@@ -28,7 +28,6 @@
 	<set name="LIME_PIXMAN" value="1" />
 	<set name="LIME_PNG" value="1" />
 	<set name="LIME_SDL" value="1" />
-	<set name="LIME_SDL_IMAGE" value="1" if="LIME_SDL" />
 	<set name="LIME_ZLIB" value="1" />
 
 	<set name="OUTPUT_DIR" value="../ndll" unless="OUTPUT_DIR" />
@@ -413,7 +412,6 @@
 		<files id="native-toolkit-pixman" if="LIME_PIXMAN" />
 		<files id="native-toolkit-wayland-protocols" if="linux" />
 		<files id="native-toolkit-sdl" if="LIME_SDL" />
-		<files id="native-toolkit-sdl_image" if="LIME_SDL_IMAGE" />
 		<files id="native-toolkit-glad" if="LIME_GLAD" />
 		<files id="native-toolkit-vorbis" if="LIME_OGG" />
 		<files id="native-toolkit-webm" if="LIME_WEBM" />
