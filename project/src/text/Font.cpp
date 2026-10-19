@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <graphics/ImageBuffer.h>
 #include <list>
-#include <SDL3/SDL.h>
+#include <SDL.h>
 #include <system/System.h>
 #include <text/Font.h>
 #include <utils/File.h>
@@ -11,6 +11,82 @@ namespace lime
 {
 
 	FT_Library Font::sharedLibrary = 0;
+
+	// SDL2 replacement for SDL3's SDL_StepUTF8 (NUL-terminated input only).
+	// Returns 0 at the end of the string without advancing, and 0xFFFD on
+	// invalid input after advancing past the offending bytes.
+	static Uint32 StepUTF8(const char **pstr)
+	{
+		const unsigned char *s = (const unsigned char *)*pstr;
+		Uint32 c = s[0];
+
+		if (c == 0)
+		{
+			return 0;
+		}
+
+		if (c < 0x80)
+		{
+			*pstr += 1;
+			return c;
+		}
+
+		int extra;
+		Uint32 minValue;
+
+		if (c >= 0xC2 && c <= 0xDF)
+		{
+			extra = 1;
+			c &= 0x1F;
+			minValue = 0x80;
+		}
+		else if ((c & 0xF0) == 0xE0)
+		{
+			extra = 2;
+			c &= 0x0F;
+			minValue = 0x800;
+		}
+		else if (c >= 0xF0 && c <= 0xF4)
+		{
+			extra = 3;
+			c &= 0x07;
+			minValue = 0x10000;
+		}
+		else
+		{
+			// Stray continuation byte, overlong lead (C0/C1), or invalid lead (F5+)
+			*pstr += 1;
+			return 0xFFFD;
+		}
+
+		int i;
+
+		for (i = 1; i <= extra; i++)
+		{
+			if ((s[i] & 0xC0) != 0x80)
+			{
+				break; // also stops at NUL, so we never read past the terminator
+			}
+
+			c = (c << 6) | (s[i] & 0x3F);
+		}
+
+		if (i <= extra)
+		{
+			// Truncated sequence: consume the lead byte and the valid continuations
+			*pstr += i;
+			return 0xFFFD;
+		}
+
+		*pstr += extra + 1;
+
+		if (c < minValue || c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+		{
+			return 0xFFFD;
+		}
+
+		return c;
+	}
 
 	void Font::InitializeLibrary()
 	{
@@ -207,7 +283,7 @@ namespace lime
 
 	int Font::GetGlyphIndex(const char *character)
 	{
-		Uint32 charCode = SDL_StepUTF8(&character, NULL);
+		Uint32 charCode = StepUTF8(&character);
 
 		if (charCode == 0)
 		{
@@ -223,7 +299,7 @@ namespace lime
 
 		while (*characters != '\0')
 		{
-			Uint32 character = SDL_StepUTF8(&characters, NULL);
+			Uint32 character = StepUTF8(&characters);
 
 			if (character == 0)
 				break;

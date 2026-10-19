@@ -7,6 +7,15 @@
 #include <system/System.h>
 #include <utils/Resource.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_BITMAP_H
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+#include FT_SFNT_NAMES_H
+#include FT_TRUETYPE_IDS_H
+#include FT_TRUETYPE_TABLES_H
+
 #ifdef HX_WINDOWS
 #undef GetGlyphIndices
 #endif
@@ -42,16 +51,19 @@ namespace lime {
 
 		public:
 
+			static void InitializeLibrary ();
+			static void ShutdownLibrary ();
+
 			Font (Resource *resource, int faceIndex = 0);
 			~Font ();
 
-			void* Decompose (bool useCFFIValue, int em);
 			int GetAscender ();
 			int GetDescender ();
 			wchar_t *GetFamilyName ();
 			int GetGlyphIndex (const char* character);
-			void* GetGlyphIndices (bool useCFFIValue, const char* characters);
-			void* GetGlyphMetrics (bool useCFFIValue, int index);
+			void* GetGlyphIndices (const char* characters);
+			void* GetGlyphMetrics (int index);
+			void* GetKerning (int leftIndex, int rightIndex);
 			int GetHeight ();
 			int GetNumGlyphs ();
 			int GetUnderlinePosition ();
@@ -59,17 +71,15 @@ namespace lime {
 			int GetStrikethroughPosition ();
 			int GetStrikethroughThickness ();
 			int GetUnitsPerEM ();
-			int RenderGlyph (int index, Bytes *bytes, int offset = 0);
-			int RenderGlyphs (value indices, Bytes *bytes);
-			void SetSize (size_t size, size_t dpi);
+			int RenderGlyph (int index, Bytes *bytes, int offset = 0, int flags = 0);
+			int RenderGlyphs (int *indices, int numIndices, Bytes *bytes, int flags = 0);
+			void SetSize (size_t size);
 
-			void* library;
-			void* face;
-			void* faceMemory;
+			FT_Library library;
+			FT_Face face;
+			bool ownedLibrary;
 
-		private:
-
-			size_t mSize;
+			static FT_Library sharedLibrary;
 
 	};
 

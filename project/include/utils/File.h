@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL3/SDL.h>
+#include <SDL.h>
 #include <utils/Bytes.h>
 
 namespace lime
@@ -20,7 +20,7 @@ namespace lime
 		size_t Write(const void *ptr, size_t size);
 
 		void *ownedMemory;
-		SDL_IOStream *handle;
+		SDL_RWops *handle;
 	};
 
 } // namespace lime
