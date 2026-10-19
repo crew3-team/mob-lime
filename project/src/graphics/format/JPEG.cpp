@@ -3,7 +3,7 @@
 #include <graphics/ImageBuffer.h>
 #include <graphics/PixelFormat.h>
 #include <SDL.h>
-#include <SDL3_image/SDL_image.h>
+#include <SDL_image.h>
 #include <system/System.h>
 #include <utils/File.h>
 
