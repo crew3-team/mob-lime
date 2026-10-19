@@ -37,7 +37,6 @@
 	<set name="NATIVE_TOOLKIT_HAVE_MBEDTLS" value="1" if="LIME_MBEDTLS" />
 	<set name="NATIVE_TOOLKIT_HAVE_PNG" value="1" if="LIME_PNG" />
 	<set name="NATIVE_TOOLKIT_HAVE_SDL" value="1" if="LIME_SDL" />
-	<set name="NATIVE_TOOLKIT_HAVE_SDL_SOUND" value="1" if="LIME_SDL_SOUND" />
 
 	<set name="NATIVE_TOOLKIT_SDL_STATIC" value="1" />
 	<set name="NATIVE_TOOLKIT_SDL_ANGLE" value="1" if="LIME_SDL_ANGLE" />
@@ -280,19 +279,6 @@
 
 		</section>
 
-		<section if="LIME_SDL_SOUND">
-
-			<compilerflag value="-DLIME_SDL_SOUND" />
-			<compilerflag value="-D__IPHONEOS__" if="ios || tvos" />
-			<compilerflag value="-D__APPLETVOS__" if="tvos" />
-			<compilerflag value="-DAPPLETV" if="tvos" />
-			<compilerflag value="-DHAVE_STDIO_H" unless="windows" />
-			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/sdl_sound/src/" />
-
-			<file name="src/media/SDLSound.cpp" />
-
-		</section>
-
 		<section if="LIME_ZLIB">
 
 			<compilerflag value="-I${NATIVE_TOOLKIT_PATH}/zlib" />
@@ -368,7 +354,6 @@
 	<include name="lib/wayland-protocols-files.xml" if="linux" />
 	<include name="lib/sdl-files.xml" />
 	<include name="lib/sdl_image-files.xml" />
-	<include name="lib/sdl_sound-files.xml" />
 	<include name="lib/tinyfiledialogs-files.xml" />
 	<include name="lib/vorbis-files.xml" />
 	<include name="lib/vpx-files.xml" />

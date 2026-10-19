@@ -67,10 +67,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef LIME_SDL_SOUND
-#include <media/SDLSound.h>
-#endif
-
 DEFINE_KIND (k_finalizer);
 
 
