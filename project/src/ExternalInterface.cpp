@@ -57,6 +57,7 @@
 #include <ui/WindowEvent.h>
 #include <utils/compress/LZMA.h>
 #include <utils/compress/Zlib.h>
+#include <utils/File.h>
 
 #ifdef HX_WINDOWS
 #include <locale>
@@ -479,12 +480,50 @@ namespace lime {
 	}
 
 
-	value lime_bytes_read_file (HxString path, value bytes) {
+	value lime_bytes_read_file(HxString path, value bytes)
+	{
+		Bytes data(bytes);
 
-		Bytes data (bytes);
-		data.ReadFile (hxs_utf8 (path, nullptr));
-		return data.Value (bytes);
+		File file(hxs_utf8(path, nullptr), "rb");
 
+		if (file.handle)
+		{
+			file.Seek(0, SEEK_END);
+
+			int size = (int)file.Tell();
+
+			file.Seek(0, SEEK_SET);
+
+			if (size > 0)
+			{
+				data.Resize(size);
+
+				file.Read(data.b, size);
+			}
+
+			file.Close();
+		}
+
+		return data.Value(bytes);
+	}
+
+	void lime_bytes_write_file(HxString path, value bytes)
+	{
+		File file(hxs_utf8(path, nullptr), "wb");
+
+		if (file.handle)
+		{
+			Bytes data(bytes);
+
+			if (data.length > 0)
+			{
+				file.Write(data.b, data.length);
+
+				file.Flush();
+			}
+
+			file.Close();
+		}
 	}
 
 
@@ -4311,6 +4350,7 @@ namespace lime {
 	DEFINE_PRIME1 (lime_bytes_get_data_pointer);
 	DEFINE_PRIME2 (lime_bytes_get_data_pointer_offset);
 	DEFINE_PRIME2 (lime_bytes_read_file);
+	DEFINE_PRIME2v (lime_bytes_write_file);
 	DEFINE_PRIME1 (lime_cffi_get_native_pointer);
 	DEFINE_PRIME1 (lime_cffi_set_finalizer);
 	DEFINE_PRIME2v (lime_clipboard_event_manager_register);

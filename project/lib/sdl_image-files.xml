@@ -29,17 +29,12 @@
 		<section>
 
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_ani.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_anim_decoder.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_anim_encoder.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_avif.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_bmp.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_gif.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_gpu.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_jpg.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_jxl.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_lbm.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_libpng.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_pcx.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_png.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_pnm.c" />
@@ -53,7 +48,6 @@
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_xpm.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_xv.c" />
 			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/IMG_xxx.c" />
-			<file name="${NATIVE_TOOLKIT_PATH}/sdl_image/src/xmlman.c" />
 
 		</section>
 
