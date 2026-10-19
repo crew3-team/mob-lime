@@ -1,10 +1,12 @@
 #include <climits>
+#include <cstring>
 #include <graphics/format/JPEG.h>
 #include <graphics/ImageBuffer.h>
 #include <graphics/PixelFormat.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <system/System.h>
+#include <utils/DynamicMemIO.h>
 #include <utils/File.h>
 
 namespace lime
@@ -19,14 +21,14 @@ namespace lime
 			return false;
 		}
 
-		if (!IMG_isJPG((SDL_IOStream *)file.handle))
+		if (!IMG_isJPG(file.handle))
 		{
 			file.Close();
 
 			return false;
 		}
 
-		SDL_Surface *surface = IMG_LoadJPG_IO((SDL_IOStream *)file.handle);
+		SDL_Surface *surface = IMG_LoadJPG_RW(file.handle);
 
 		if (!surface)
 		{
@@ -35,11 +37,11 @@ namespace lime
 			return false;
 		}
 
-		if (surface->format != SDL_PIXELFORMAT_RGBA32)
+		if (surface->format->format != SDL_PIXELFORMAT_RGBA32)
 		{
 			SDL_Surface *old_surface = surface;
-			surface = SDL_ConvertSurface(old_surface, SDL_PIXELFORMAT_RGBA32);
-			SDL_DestroySurface(old_surface);
+			surface = SDL_ConvertSurfaceFormat(old_surface, SDL_PIXELFORMAT_RGBA32, 0);
+			SDL_FreeSurface(old_surface);
 		}
 
 		if (!surface)
@@ -53,7 +55,7 @@ namespace lime
 
 		memcpy(imageBuffer->data->buffer->b, surface->pixels, surface->h * surface->pitch);
 
-		SDL_DestroySurface(surface);
+		SDL_FreeSurface(surface);
 
 		file.Close();
 
@@ -62,60 +64,56 @@ namespace lime
 
 	bool JPEG::Encode(ImageBuffer *imageBuffer, Bytes *bytes, int quality)
 	{
-		SDL_Surface *surface = SDL_CreateSurfaceFrom(imageBuffer->width, imageBuffer->height, SDL_PIXELFORMAT_RGBA32, imageBuffer->data->buffer->b, imageBuffer->Stride());
+		SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormatFrom(imageBuffer->data->buffer->b, imageBuffer->width, imageBuffer->height, 32, imageBuffer->Stride(), SDL_PIXELFORMAT_RGBA32);
 
 		if (!surface)
 		{
 			return false;
 		}
 
-		SDL_Surface *rgb = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGB24);
+		SDL_Surface *rgb = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB24, 0);
 
-		SDL_DestroySurface(surface);
+		SDL_FreeSurface(surface);
 
 		if (!rgb)
 		{
 			return false;
 		}
 
-		SDL_IOStream *dst = SDL_IOFromDynamicMem();
+		SDL_RWops *dst = DynamicMemIO_Create();
 
 		if (!dst)
 		{
-			SDL_DestroySurface(rgb);
+			SDL_FreeSurface(rgb);
 
 			return false;
 		}
 
-		bool success;
+		bool success = false;
 
 		if (bytes)
 		{
-			success = IMG_SaveJPG_IO(rgb, dst, false, quality);
+			// Returns 0 on success; freedst = 0 so we close it ourselves
+			success = (IMG_SaveJPG_RW(rgb, dst, 0, quality) == 0);
 
 			if (success)
 			{
-				int64_t size = SDL_TellIO(dst);
+				DynamicMemIO *mem = DynamicMemIO_Get(dst);
 
-				if (size <= 0 || size > INT_MAX)
+				if (mem->size == 0 || mem->size > INT_MAX)
 				{
 					success = false;
 				}
 				else
 				{
-					SDL_SeekIO(dst, 0, SDL_IO_SEEK_SET);
-					bytes->Resize((int)size);
-					SDL_ReadIO(dst, bytes->b, (size_t)size);
+					bytes->Resize((int)mem->size);
+					memcpy(bytes->b, mem->data, mem->size);
 				}
 			}
 		}
-		else
-		{
-			success = false;
-		}
 
-		SDL_CloseIO(dst);
-		SDL_DestroySurface(rgb);
+		SDL_RWclose(dst);
+		SDL_FreeSurface(rgb);
 
 		return success;
 	}
